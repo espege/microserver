@@ -1,6 +1,6 @@
 ---
 
-# ansible-playbook /Users/Simon/Library/CloudStorage/OneDrive-Personnel/Documents/Scripts/Ansible/configure_server/run_subtask.yaml -i inventory_prod.ini
+# ansible-playbook /Ansible/configure_server/run_subtask.yaml -i inventory_prod.ini
 
 - name: Playbook testing
   hosts: microserver
