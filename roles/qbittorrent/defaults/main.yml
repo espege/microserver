@@ -1,0 +1,3 @@
+qbittorrent_nox_user: "{{ svc_accounts['qbittorrent-nox'].name }}"
+qbittorrent_nox_user_groups: "{{ svc_accounts['qbittorrent-nox'].groups }}"
+service_name: "{{ svc_accounts['qbittorrent-nox'].name }}.service"

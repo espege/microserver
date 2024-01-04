@@ -1,0 +1,5 @@
+# configure_server/subtasks/configure_qbittorrent.yml
+
+- name: Configure qbittorrent
+  include_role:
+    name: qbittorrent

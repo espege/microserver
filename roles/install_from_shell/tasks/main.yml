@@ -1,0 +1,16 @@
+---
+# roles/install_from_shell/tasks/main.yml
+
+# Download to temp and install
+
+- name: Download files
+  ansible.builtin.uri:
+    url: "{{ item.base_url }}{{ item.name }}"
+    dest: /tmp/{{ item.name }}
+    mode: '0700'
+  loop: "{{ downloads }}"
+
+- name: Execute shell
+  ansible.builtin.shell:
+    cmd: /tmp/{{ item.name }}
+  loop: "{{ downloads }}"

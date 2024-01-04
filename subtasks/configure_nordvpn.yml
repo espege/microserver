@@ -1,0 +1,5 @@
+# configure_server/subtasks/configure_nordvpn.yml
+
+- name: Configure NordVPN
+  include_role:
+    name: nordvpn

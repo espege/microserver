@@ -1,0 +1,45 @@
+
+software: 
+    - package: 'qbittorrent-nox'
+      check_svc: no # Only start if nordvpn enabled
+      repo: 'ppa:qbittorrent-team/qbittorrent-stable'
+      useraccount: qbittorrent-nox
+      signed_repo_info:
+
+    # As per: https://support.plex.tv/articles/235974187-enable-repository-updating-for-supported-linux-server-distributions/
+    # echo deb https://downloads.plex.tv/repo/deb public main | sudo tee /etc/apt/sources.list.d/plexmediaserver.list
+    - package: 'plexmediaserver'
+      check_svc: yes
+      signed_repo_info:
+        - gpg_url: https://downloads.plex.tv/plex-keys/PlexSign.key
+        - relase: public
+        - branch: stable
+        - owner: plex
+      repo:
+      useraccount: plex
+
+    - package: 'nordvpn'
+      check_svc: yes
+      repo: 
+      useraccount: 
+      signed_repo_info:
+
+    - package: 'ufw'
+      check_svc: yes
+      repo: 
+      useraccount: 
+      signed_repo_info:
+
+    - package: 'onedrive'
+      check_svc:
+      repo: 
+      useraccount: 'onedrive'
+      signed_repo_info:
+    - package: 'openssh-server'
+    - package: 'zfsutils-linux'
+    - package: 'acl'
+    - package: 'python3-pip'
+
+python:
+  modules:
+    env_canada

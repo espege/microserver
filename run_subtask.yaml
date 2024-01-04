@@ -1,0 +1,22 @@
+---
+
+# ansible-playbook /Users/Simon/Library/CloudStorage/OneDrive-Personnel/Documents/Scripts/Ansible/configure_server/run_subtask.yaml -i inventory_prod.ini
+
+- name: Playbook testing
+  hosts: microserver
+  become: true
+
+  vars_files:
+    - vars/required_software.yaml
+    - vars/manual_software.yaml
+    - vars/storage_pool.yaml
+    - vars/ubuntu_groups.yaml
+    - vars/users.yaml
+    - vars/service_accounts.yaml
+    - vars/cron_jobs.yaml
+
+
+  tasks:
+    - name: Ubuntu | Run substask cron jobs1
+      ansible.builtin.import_tasks:
+        file: configure_cron_jobs.yml

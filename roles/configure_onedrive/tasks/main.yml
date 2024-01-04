@@ -1,0 +1,50 @@
+---
+#roles/configure_onedrive/tasks/main.yml
+  - name: Ubuntu | Filesystem | Create required directory structure
+    ansible.builtin.file:
+      state: directory
+      path: /home/{{ owner }}/{{ item }}
+      owner: "{{ owner }}"
+      group: "{{ owner }}"
+      mode: 0700
+      recurse: yes
+    loop:
+    - .config/onedrive
+
+  - name: Debug
+    debug:
+      msg: /home/{{ owner }}/onedrive.ini
+
+  - name: Ubuntu | Onedrive | Copy Configuration file
+    ansible.builtin.copy:
+      src: files/onedrive.ini
+      dest: /home/{{ owner }}/.config/onedrive/config
+      owner: "{{ owner }}"
+      group: "{{ owner }}"
+      mode: '0644'
+    register: configFile
+    notify: restart service
+
+  - name: Ubuntu | Onedrive | Copy Sync List
+    ansible.builtin.copy:
+      src: files/sync_list.ini
+      dest: /home/{{ owner }}/.config/onedrive/sync_list
+      owner: "{{ owner }}"
+      group: "{{ owner }}"
+      mode: '0644'
+    register: syncFile
+    notify: restart service
+    become: true
+    become_user: "{{ owner }}"
+
+  #- name: Ubuntu | Onedrive | Run resync if config changed
+  #  ansible.builtin.shell: onedrive --synchronize --resync
+  #  when: configFile.changed == True or syncFile.changed == True
+  #  become: true
+  #  become_user: "{{ owner }}"
+
+  - name: Enable service
+    ansible.builtin.service:
+      name: onedrive@{{ owner }}.service
+      enabled: true
+      state: started

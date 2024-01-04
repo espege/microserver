@@ -1,0 +1,10 @@
+# configure_server/subtasks/create_users.yml 
+
+- name: Linux | Users | Create all required users
+  ansible.builtin.user:
+    name: "{{ item.name }}"
+    comment: "{{ item.comment | default('Created by ansible')}}"
+    groups: "{{ item.groups }}"
+    append: true
+    shell: /bin/bash
+  loop: "{{ users }}"

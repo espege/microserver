@@ -1,0 +1,25 @@
+# microserver/subtasks/install_software.yml
+- name: "Check if listed manual package is installed or not on Debian Linux family"
+  command: dpkg-query -l "{{ item.software }}"
+  loop: "{{ downloads }}"
+  register: package_check
+  when: ansible_facts['os_family'] == "Debian"
+  changed_when: False
+  failed_when: False
+
+- name: Manual downloads
+  include_role:
+    name: install_from_shell
+  when: package_check.results[0].stderr is search("no packages found matching")
+
+- name: "Print execution results"
+  debug:
+    msg: "Package is installed"
+  when: package_check is succeeded
+
+- name: Install software
+  include_role:
+    name: install_software
+  vars: 
+    - sofware: software
+  ignore_errors: yes
