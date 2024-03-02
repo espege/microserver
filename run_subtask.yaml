@@ -1,10 +1,13 @@
 ---
 
-# ansible-playbook /Ansible/configure_server/run_subtask.yaml -i inventory_prod.ini
+# ansible-playbook run_subtask.yaml -i inventory_prod.ini --vault-password-file=.vault_pwd_file
 
 - name: Playbook testing
   hosts: microserver
   become: true
+
+  vars: 
+    local_subnet_range: 192.168.0.0/24
 
   vars_files:
     - vars/required_software.yaml
@@ -14,9 +17,10 @@
     - vars/users.yaml
     - vars/service_accounts.yaml
     - vars/cron_jobs.yaml
+    - vars/credentials.yaml
 
 
   tasks:
-    - name: Ubuntu | Run substask cron jobs1
+    - name: Ubuntu | Run a single substask file
       ansible.builtin.import_tasks:
-        file: configure_cron_jobs.yml
+        file: subtasks/configure_qbittorrent.yml

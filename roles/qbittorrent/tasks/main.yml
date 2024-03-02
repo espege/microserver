@@ -1,20 +1,15 @@
 ---
-#roles/qbittorrent/tasks/main.yml
-- debug:
-    var:
-      svc_accounts
-
 - name: Ensure package is installed.
   ansible.builtin.package:
     name: qbittorrent-nox
     state: "{{ qbittorrent_nox_package_state | default(present) }}"
   notify: restart service
 
-- name: Gather package facts.
+- name: Gather package facts # Used at step Ensure systemd unit file is present
   ansible.builtin.package_facts:
     manager: auto
 
-- name: Ensure config directory exists.
+- name: Ensure required directories exists.
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
@@ -24,6 +19,8 @@
   with_items:
     - /home/{{ qbittorrent_nox_user }}/.config/
     - /home/{{ qbittorrent_nox_user }}/.config/qBittorrent/
+    - "{{ config_torrentfile_work_path }}"
+    - "{{ config_torrentfile_complete_path }}"
 
 - name: Ensure legal notice is accepted.
   ansible.builtin.lineinfile:
@@ -51,6 +48,14 @@
     - restart service
   when: "ansible_service_mgr == 'systemd'"
 
+- name: Copy categories file
+  ansible.builtin.copy:
+    content: "{{ categories_save_paths | to_json }}" 
+    dest: /home/{{ qbittorrent_nox_user }}/.config/qBittorrent/categories.json
+    owner: "{{ qbittorrent_nox_user }}"
+    group: "{{ qbittorrent_nox_user }}"
+    mode: '0644'
+
 - name: Linux | qbittorrent-nox | set configuration file content
   ansible.builtin.lineinfile:
     path: /home/{{ qbittorrent_nox_user }}/.config/qBittorrent/qBittorrent.conf
@@ -59,7 +64,10 @@
     owner: "{{ qbittorrent_nox_user }}"
     group: "{{ qbittorrent_nox_user }}"
     mode: '0644'
+    insertafter: "{{ item.after | default(omit) }}"
   loop: "{{ conf_lines }}"
+  loop_control:
+    label: "{{ item.line }}"
   notify:
     - restart service
 

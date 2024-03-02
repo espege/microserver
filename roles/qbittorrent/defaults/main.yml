@@ -1,3 +1,19 @@
 qbittorrent_nox_user: "{{ svc_accounts['qbittorrent-nox'].name }}"
 qbittorrent_nox_user_groups: "{{ svc_accounts['qbittorrent-nox'].groups }}"
 service_name: "{{ svc_accounts['qbittorrent-nox'].name }}.service"
+config_qbittorrent_webui_username: torrentUser
+config_preferred_interface: nordlynx
+config_add_ext_to_incomplete_files: 'true'
+config_default_save_path: /{{ zfs_pool_name }}/Videos/
+config_staging_path: /home/{{ svc_accounts['qbittorrent-nox'].name }}/torrent_staging
+config_torrentfile_work_path: /home/{{ svc_accounts['qbittorrent-nox'].name }}/torrents
+config_torrentfile_complete_path: "{{ config_torrentfile_work_path }}/complete/"
+config_dyndns_domain_name: ""
+config_dyndns_user_name: ""
+config_webui_login_from_whitelist_subnet: 'true'
+whitelist_subnet: "{{ local_subnet_range | default('192.168.0.0/24') }}"
+categories_save_paths:
+  Films: 
+    save_path: "/{{ zfs_pool_name }}/Videos/Films/"
+  TV:
+    save_path": "/{{ zfs_pool_name }}/Videos/TV/"
