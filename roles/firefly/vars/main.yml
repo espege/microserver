@@ -1,0 +1,20 @@
+###############################################################################
+# Default Firefly User Account
+###############################################################################
+# Default user settings if an firefly user is force created.
+#
+# Logins are disabled.
+
+firefly_default_user:
+  name:            'firefly'
+  group:           'firefly'
+  uid:             33
+  shell:           '/usr/sbin/nologin'
+  home:            '/var/www/firefly'
+  comment:         'firefly'
+  create_home:     false
+  password:        '!'
+  password_lock:   true
+  update_password: 'always'
+  expires:         -1
+  system:          true

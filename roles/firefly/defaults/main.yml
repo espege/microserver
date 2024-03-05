@@ -1,0 +1,7 @@
+ff_url: http://app:8080
+ff_vanity_url: http://localhost
+firefly_staging_directory: /home/ansible/firefly/
+
+firefly_http_host: localhost-ff
+firefly_http_conf: localhost-ff.conf
+firefly_http_port: 80
