@@ -1,7 +1,6 @@
-ff_url: http://app:8080
-ff_vanity_url: http://localhost
+# FIREFLY_III_URL: "http://app:8080" # as per ff docs
+FIREFLY_III_URL: "http://{{ ansible_host }}:8080" 
+# ff_vanity_url: http://localhost # as per ff docs
+ff_vanity_url: "http://{{ ansible_host }}"  
 firefly_staging_directory: /home/ansible/firefly/
-
-firefly_http_host: localhost-ff
-firefly_http_conf: localhost-ff.conf
-firefly_http_port: 80
+firefly_app_url: "http://{{ ansible_host }}" 
