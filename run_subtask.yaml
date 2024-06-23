@@ -17,10 +17,16 @@
     - vars/users.yaml
     - vars/service_accounts.yaml
     - vars/cron_jobs.yaml
+    - vars/monitoring.yaml
     - vars/credentials.yaml
+    - vars/actual_budget.yaml
 
 
   tasks:
-    - name: Ubuntu | Run a single substask file
+    - name: Ubuntu | Run a single substask file    
       ansible.builtin.import_tasks:
-        file: subtasks/configure_qbittorrent.yml
+        file: subtasks/install_actual_budget.yml
+
+      
+      # vars:
+      #   backup_dst_dir: /micropool/Simon/Backups

@@ -1,0 +1,33 @@
+---
+# file: roles/actual_budget/tasks/main.yaml
+
+- name: Ensure directory
+  ansible.builtin.file:
+    path: '{{ actual_directory }}'
+    state: '{{ actual_install_status == "present" | ternary("directory", "absent") }}' # 
+
+- name: Copy Files
+  ansible.builtin.template:
+    src: '{{ item }}'
+    dest: '{{ actual_directory }}/{{ item }}'
+  loop:
+    - docker-compose.yaml
+
+- name: Create and start services
+  community.docker.docker_compose_v2:
+    project_src: "{{ actual_directory }}"
+    pull: always
+    state: '{{ actual_install_status }}'
+    recreate: auto
+  register: output
+
+- name: Copy actual budget DB
+  ansible.builtin.cron:
+    name: Copy tarball of actual budget
+    minute: "30"
+    hour: "7" # UTC time for 0200
+    month: "*"
+    weekday: Sun
+    job: sudo tar -czvf {{ backups_destination }}/actual_budget.tar {{ actual_directory }}/{{ data_directory_name }}/
+    state: '{{ actual_install_status }}'
+  when: backups_destination is defined

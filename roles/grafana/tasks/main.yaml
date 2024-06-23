@@ -1,0 +1,34 @@
+# roles/grafana/tasks/main.yaml
+
+# - name: Get running services
+#   ansible.builtin.service_facts:
+
+# - debug:
+#     var: ansible_facts.services
+
+- name: Monitoring | Install Grafana Agent
+  ansible.builtin.shell:
+    cmd: |
+      /bin/sh -c "$(curl -fsSL https://storage.googleapis.com/cloud-onboarding/agent/scripts/static/install-linux.sh)"
+  environment: 
+    ARCH: "amd64"
+    GCLOUD_HOSTED_METRICS_URL: "{{ metrics_endpoint }}" 
+    GCLOUD_HOSTED_METRICS_ID: "{{ metrics_id }}"
+    GCLOUD_SCRAPE_INTERVAL: "{{ scrape_interval }}"
+    GCLOUD_HOSTED_LOGS_URL: "{{ logs_url }}"
+    GCLOUD_HOSTED_LOGS_ID: "{{ logs_id }}"
+    GCLOUD_RW_API_KEY: "{{ GCLOUD_RW_API_KEY}} "
+  tags: install_agent
+
+# - name: Monitoring | Enable Grafana agent 
+
+- name: Monitoring | Configure nodeexporter
+  ansible.builtin.blockinfile:
+    path: "{{ agent_config_file }}"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK"
+    insertafter: 'integrations:'
+    marker_begin: BEGIN
+    marker_end: END
+    block: "{{ lookup('ansible.builtin.template', './files/node_exporter.j2') }}"
+  notify: 
+    - restart service
