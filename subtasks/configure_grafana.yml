@@ -1,0 +1,5 @@
+# subtasks/configure_grafana.yml
+
+- name: Configure Grafana
+  include_role:
+    name: grafana

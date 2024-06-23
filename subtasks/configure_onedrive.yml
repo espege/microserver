@@ -1,0 +1,8 @@
+# microserver/subtasks/configure_onedrive.yml
+
+- name: Configure OneDrive
+  include_role:
+    name: onedrive
+  vars:
+  - owner: Simon
+  tags: onedrive

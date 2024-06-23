@@ -1,10 +1,13 @@
 - name: Move scripts to server
-  ansible.builtin.copy:
-    src: files/scripts/
-    dest: scripts/
+  ansible.builtin.template:
+    src: files/scripts/{{ item }}
+    dest: scripts/{{ item | replace('.j2','') }}
     owner: ansible
     group: ansible
     mode: '0740'
+  loop:
+    - connect-nordvpn.sh
+    - plex-backup.sh.j2
 
 - name: Creates an cron job entry"
   ansible.builtin.cron:

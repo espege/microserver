@@ -1,0 +1,3 @@
+actual_directory: /home/ansible/actual
+actual_install_status: present
+data_directory_name: actual-data

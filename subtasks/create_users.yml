@@ -1,4 +1,4 @@
-# configure_server/subtasks/create_users.yml 
+# microserver/subtasks/create_users.yml 
 
 - name: Linux | Users | Create all required users
   ansible.builtin.user:
@@ -6,5 +6,7 @@
     comment: "{{ item.comment | default('Created by ansible')}}"
     groups: "{{ item.groups }}"
     append: true
-    shell: /bin/bash
+    shell: "{{ item.shell | default('/bin/bash') }}"
   loop: "{{ users }}"
+  register:
+    created_users

@@ -1,0 +1,14 @@
+# subtasks/photoprism.yml
+---
+- name: Docker install Photoprism
+  include_role:
+    name: photoprism
+  vars:
+    photoprism_base_dir: "/var/www/html/storage/configurations/photoprism"
+    admin_user: "{{ photoprism.photoprism_admin_user }}"
+    admin_password: "{{ photoprism.photoprism_admin_password }}"
+    db_user: "{{  photoprism.db_user }}"
+    db_password: "{{  photoprism.db_password }}"
+    db_root_password: "{{  photoprism.db_root_password }}"
+    photos_volume: "{{ photoprism.pictures_path }}"
+    local_storage_path: "{{ photoprism.local_storage_path }}"
