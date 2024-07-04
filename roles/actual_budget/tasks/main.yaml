@@ -4,7 +4,7 @@
 - name: Ensure directory
   ansible.builtin.file:
     path: '{{ actual_directory }}'
-    state: '{{ actual_install_status == "present" | ternary("directory", "absent") }}' # 
+    state: '{{ (actual_install_status == "present") | ternary("directory", "absent") }}' # 
 
 - name: Copy Files
   ansible.builtin.template:
