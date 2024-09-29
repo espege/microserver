@@ -1,0 +1,7 @@
+ruleset:
+  - rule: allow
+    proto: tcp
+    from_ip: 192.168.0.0/24
+    port: "{{ actual_port }}"
+    to_ip: "{{ ansible_host }}"
+    comment: Allow actual budget from local subnet

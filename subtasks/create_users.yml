@@ -1,5 +1,12 @@
 # microserver/subtasks/create_users.yml 
 
+- name: Linux | Groups | Create all required user groups
+  ansible.builtin.group:
+    name: "{{ item }}"
+  loop: "{{ users | map(attribute='groups') | flatten }}"
+  register:
+    created_users
+
 - name: Linux | Users | Create all required users
   ansible.builtin.user:
     name: "{{ item.name }}"

@@ -4,14 +4,33 @@
 - name: Ensure directory
   ansible.builtin.file:
     path: '{{ actual_directory }}'
-    state: '{{ (actual_install_status == "present") | ternary("directory", "absent") }}' # 
+    state: '{{ (actual_install_status == "present") | ternary("directory", "absent") }}'
 
-- name: Copy Files
+- name: Generate self-signed certificate
+  include_role:
+    name: self-signed-cert
+  vars:
+    dest_directory: "{{ actual_directory }}/{{ actual_data_directory }}"
+  tags:
+    - certificate
+    - self-signed
+
+- name: Copy Docker Compose to root directory
   ansible.builtin.template:
-    src: '{{ item }}'
-    dest: '{{ actual_directory }}/{{ item }}'
+    src: "{{ item }}"
+    dest: '{{ actual_directory }}/{{ item | replace(".j2", "")}}'
   loop:
-    - docker-compose.yaml
+    - docker-compose.yaml.j2
+
+- name: Copy certificate config to data directory
+  ansible.builtin.template:
+    src: "{{ item }}"
+    dest: '{{ actual_directory }}/{{ actual_data_directory }}/{{ item | replace(".j2", "")}}'
+  loop:
+    - config.json.j2
+  tags: 
+    - certificate
+    - self-signed
 
 - name: Create and start services
   community.docker.docker_compose_v2:
@@ -21,7 +40,14 @@
     recreate: auto
   register: output
 
-- name: Copy actual budget DB
+- name: Configure Actual Firewall rules
+  include_role:
+    name: ufw_config
+  tags:
+    - firewall
+    - ufw
+
+- name: Backup | Actual DB
   ansible.builtin.cron:
     name: Copy tarball of actual budget
     minute: "30"

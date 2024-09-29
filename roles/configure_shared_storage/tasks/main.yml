@@ -3,16 +3,22 @@
 
 - name: Debug | Output pool name
   ansible.builtin.debug:
-    msg: "Excecuting role configure_shared_storage and this is the value of zfs_zfs_pool_name {{ zfs_pool_name }}"
+    msg: "Excecuting role configure_shared_storage and this is the value of zfs_pool_name {{ zfs_pool_name }}"
+  tags:
+    - always
 
-- name: Debug | Output folders content
-  ansible.builtin.debug:
-    msg: "Excecuting role configure_shared_storage and this is the value of folders {{ pool_folders }}"
+# - name: Debug | Output folders content
+#   ansible.builtin.debug:
+#     msg: "Excecuting role configure_shared_storage and this is the value of folders {{ pool_folders }}"
+#   tags:
+#     - always
  
 - name: Confirm storage pool directory exists
   ansible.builtin.stat:
     path: "/{{ zfs_pool_name }}"
   register: pool_mounted
+  tags:
+    - always
   
 - name: Linux | Check folder & permissions in {{ zfs_pool_name }}
   block:
@@ -25,6 +31,7 @@
         mode: "{{ item.mode }}"
         recurse: yes
       loop: "{{ pool_folders }}"
+      tags: directories
     
     - name: Linux | ACL | Configure ZFS for linux
       ansible.builtin.shell:
@@ -33,17 +40,15 @@
          zfs set xattr=sa {{ zfs_pool_name }}
         # Uses normal Linux 
         # Store file ACLs in iNode instead of in subfolder
+      tags: zfs
         
-    - name: Linux | Set facl on directories
-      ansible.posix.acl:
-        path: /{{ zfs_pool_name }}/{{ item.facl.path }}/
-        entity: "{{ item.facl.entity }}"
-        etype: "{{ item.facl.etype }}"
-        permissions: "{{ item.facl.permissions }}"
-        default: "{{ item.facl.default }}"
-        state: "{{ item.facl.state }}"
-        recursive: true
-      loop: "{{ pool_folders }}"
-      when: item.facl is defined
+    - name: Linux | Set facl on directories (outer loop)
+      ansible.builtin.include_tasks: facl.yml
+      loop: "{{ pool_folders | dict2items }}"
+      loop_control:
+        label: "{{ outer_item.key }}"
+        loop_var: outer_item
+      when: outer_item.value.facl is defined
+      tags: facl
 
   when: pool_mounted.stat.isdir is defined and pool_mounted.stat.isdir

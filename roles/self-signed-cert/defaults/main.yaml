@@ -1,0 +1,6 @@
+# roles/self-signed-cert/defaults/main.yaml
+
+key_name: certificate.key
+cert_name: certificate.pem
+private_key_path: "{{ dest_directory }}/{{ key_name }}"
+cert_path: "{{ dest_directory }}/{{ cert_name }}"

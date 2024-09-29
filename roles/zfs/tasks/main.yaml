@@ -1,0 +1,12 @@
+# roles/zfs/tasks
+
+- name: Linux | apt | install package
+  ansible.builtin.apt:
+    name: zfsutils-linux
+    state: present
+
+- name: Linux | Check ZFS pool micropool
+  community.general.zfs:
+    name: micropool
+    state: present
+  check_mode: true

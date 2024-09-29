@@ -1,0 +1,7 @@
+# roles/plex/defaults
+docker_compose_path: /etc/docker/plex
+path_to_plex_db: /home/plex/
+path_to_media: /micropool/Videos
+time_zone: America/Montreal
+plex_hostname: SPLéa
+plex_port: 32400

@@ -1,6 +1,14 @@
 ---
 #roles/ufw_config/tasks
 
+- name: Install UFW package
+  ansible.builtin.apt:
+    name: ufw
+    state: present
+  tags:
+    - apt
+    - ufw
+  
 - name: Implement firewall rules
   community.general.ufw:
     rule: "{{ item.rule }}"

@@ -1,0 +1,4 @@
+# roles/actual_budget/defaults/main.yml
+actual_data_directory: ./actual-data
+actual_install_status: true
+actual_port: 5006

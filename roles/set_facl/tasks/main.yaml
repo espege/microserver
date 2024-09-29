@@ -8,7 +8,7 @@
 
 - name: Linux | Set facl on directory
   ansible.posix.acl:
-    path: /{{ raid_array_name }}/{{ item.facl.path }}/
+    path: /{{ zfs_pool_name }}/{{ item.facl.path }}/
     entity: "{{ item.facl.entity }}"
     etype: "{{ item.facl.etype }}"
     permissions: "{{ item.facl.permissions }}"

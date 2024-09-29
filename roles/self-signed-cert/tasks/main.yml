@@ -1,0 +1,11 @@
+- name: Create private key (RSA, 4096 bits)
+  community.crypto.openssl_privatekey:
+    path: "{{ private_key_path }}"
+  register: key
+
+- name: Create simple self-signed certificate
+  community.crypto.x509_certificate:
+    path: "{{ cert_path }}"
+    privatekey_path: "{{ private_key_path }}"
+    provider: selfsigned
+  register: selfsigned
