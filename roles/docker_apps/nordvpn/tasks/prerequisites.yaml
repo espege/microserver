@@ -1,0 +1,44 @@
+- name: Create qBittorrent user
+  ansible.builtin.user:
+    name: qbittorrent-nox
+    comment: "Qbittorent svc account | Created by ansible"
+    groups: Media
+    append: true
+    shell: "/usr/bin/nologin"
+  register:
+    qbittorrent_nox_user
+  tags:
+    - prerequisites
+    - user
+
+- name: Create nordvpn user
+  ansible.builtin.user:
+    name: "{{ nordvpn.user }}"
+    comment: Created by ansible
+    shell: "/usr/sbin/nologin"
+  register:
+    nordvpn_user
+  tags:
+    - prerequisites
+    - user
+
+- name: Create Media group
+  ansible.builtin.user:
+    name: Media
+    state: present
+  register:
+    media_group
+  tags:
+    - prerequisites
+    - group
+
+- name: Confirm qbittorrent LVM is mounted
+  ansible.builtin.include_tasks:
+    lvm_mount.yaml
+
+- name: Install docker
+  include_role:
+    name: docker
+  tags:
+    - docker
+    - prerequisites

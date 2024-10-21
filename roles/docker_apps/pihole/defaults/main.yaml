@@ -1,0 +1,3 @@
+pyhole_install_status: present
+dsn_port: 53
+http_port: 8083

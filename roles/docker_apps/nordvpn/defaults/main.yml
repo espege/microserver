@@ -1,0 +1,40 @@
+# traefik vars
+traefik_dir: /src/docker/traefik
+traefik_certs_dir: "{{ traefik_dir }}/traefik_certificates"
+traefik_config_dir: "{{ traefik_dir }}/traefik_config"
+traefik_config_file: dynamic.yaml
+traefik_container_certs_dir: /etc/mounted_certs
+
+# roles/docker_apps/nordvpn/defaults/main.yml
+nordvpn: 
+  user: nordvpn
+  home: /home/nordvpn
+nordvpn_config_path: /src/docker/nordvpn
+# nordvpn_config_path: "{{ nordvpn.home }}"
+desired_state: present
+bogus_email: jenerepondspas@outlook.com
+
+# qbittorrent vars
+QBT_EULA: confirm
+QBT_VERSION: latest
+QBT_WEBUI_PORT: "{{ qbittorrent_port }}"
+QBT_DIRECTORIES:
+  CONFIG_PATH: "{{ mount_point }}/config"
+  DOWNLOADS_PATH: "{{ mount_point }}/downloads"
+  COMPLETE_TORRENT_PATH: "{{ mount_point }}/complete"
+  INCOMPLETE_TORRENT_PATH: "{{ mount_point }}/torrents"
+  FINISHED_DOWNLOADS_PATH: /{{ zfs_pool_name }}
+docker_compose_path: /home/qbittorrent-nox/
+mount_point: /qbittorrent-staging
+lvm_name: qbittorrent-staging
+vg_name: ubuntu-vg
+qbittorrent_port: 8080
+time_zone: America/Montreal
+is_mounted: "{{ mount_point is mount }}"
+ruleset:
+  - rule: allow
+    proto: tcp
+    from_ip: 192.168.0.0/24
+    port: "{{ qbittorrent_port }}"
+    to_ip: "{{ ansible_host }}"
+    comment: Allow qbittorrent from local network

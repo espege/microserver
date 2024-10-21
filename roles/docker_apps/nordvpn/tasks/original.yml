@@ -1,0 +1,48 @@
+- name: Linux | Get Facts | NordVPN currently Allowlisted ports
+  ansible.builtin.shell:
+    cmd: nordvpn settings | grep -A 10 "Allowlisted"
+  register: current_Allowlisted
+  changed_when: False
+  failed_when: False
+
+- name: Configure NordVPN firewall rules | Whitelist local subnet
+  ansible.builtin.shell:
+    cmd: nordvpn whitelist add subnet {{ item }}
+  register: nvpmfirewallsubnet
+  changed_when: nvpmfirewallsubnet.stdout is search("allowlisted successfully")
+  loop: "{{ ranges_to_whitelist }}"
+  when: current_Allowlisted.failed or current_Allowlisted is not search(item)
+
+- name: Linux | NordVPN | Firewall | Whitelist tcp port
+  ansible.builtin.shell:
+    cmd: nordvpn whitelist add port {{ item }} protocol TCP
+  register: nvpnfirweallport
+  changed_when: nvpnfirweallport.stdout is search("allowlisted successfully")
+  loop: "{{ ports_to_whitelist }}"
+  when: current_Allowlisted is not search(item|string)
+
+- name: Confirm NordVPN is logged in
+  ansible.builtin.shell:
+    cmd: nordvpn connect
+  register:
+    connection
+  changed_when: False
+  failed_when: False
+
+- name: Debug connect output
+  ansible.builtin.debug:
+    msg: "Connection status: Already connected"
+  when: connection.stdout is search("already logged in")
+
+- name: NordVPN | Login and connect when not connected
+  block:
+
+    - name: NordVPN | Login to service
+      ansible.builtin.shell:
+        cmd: nordvpn login --token {{ vpn_token }}
+
+    - name: NordVPN | Initiate VPN connexion
+      ansible.builtin.shell:
+        cmd: nordvpn connect
+
+  when: connection.stdout is search("not logged in")

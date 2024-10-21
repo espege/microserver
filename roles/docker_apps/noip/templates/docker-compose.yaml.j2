@@ -1,0 +1,14 @@
+# https://www.noip.com/support/knowledgebase/ip-linux-duc-docker
+services:
+  noip-duc:
+    container_name: noip-duc
+    image: ghcr.io/noipcom/noip-duc:latest
+    restart: unless-stopped
+    ports:
+      - "8082:80" 
+      # - "6443:443" 
+    environment:
+      - TZ={{ time_zone }}
+      - NOIP_USERNAME={{ noip_user }}
+      - NOIP_PASSWORD={{ noip_password}}
+      - NOIP_HOSTNAMES=all.ddnskey.com

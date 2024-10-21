@@ -1,0 +1,102 @@
+services:
+  proxy:
+    image: traefik:latest         # Review traefik documentation https://doc.traefik.io/traefik/ 
+    container_name: traefik
+    networks: 
+    - {{ docker_proxy_network.name }}
+    build:
+      context: .
+      dockerfile: Dockerfile-traefik
+    command:
+      - --api.insecure=true
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --providers.file.directory=/etc/traefik/dynamic
+      - --entrypoints.web.address=:80
+      - --entrypoints.websecure.address=:443
+      - "--log=true"
+      - "--log.level=DEBUG"
+      # - "--certificatesresolvers.myresolver.acme.dnschallenge=true"
+      # - "--certificatesresolvers.myresolver.acme.dnschallenge.provider=ovh"
+      # - --certificatesresolvers.myresolver.acme.tlschallenge=true
+      # - --certificatesresolvers.myresolver.acme.email={{ public_email }}
+      # - --certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json
+    ports:
+      - 80:80/tcp
+      - 443:443/tcp
+      - 8080:8080/tcp
+    
+    volumes:
+      - "./letsencrypt:/letsencrypt"
+      - type: bind
+        source: {{ traefik_config_dir }}/{{ traefik_config_file }}
+        target: /etc/traefik/dynamic/{{ traefik_config_file }}
+      - type: bind
+        source: {{ traefik_certs_dir }}
+        target: /etc/mounted_certs/
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    restart: unless-stopped
+
+  vpn:
+    image: ghcr.io/bubuntux/nordvpn
+    container_name: vpn
+    networks: 
+      - {{ docker_proxy_network.name }}
+    cap_add:
+      - NET_ADMIN               # Required
+      - NET_RAW                 # Required
+    environment:                # Review https://github.com/bubuntux/nordvpn#environment-variables
+      - TOKEN={{ vpn_token}}
+      - CONNECT=Canada
+      - TECHNOLOGY=NordLynx
+    sysctls:
+      - net.ipv6.conf.all.disable_ipv6=1  # Recomended if using ipv4 only
+
+  qbittorrent-nox:
+    # for debugging
+    #cap_add:
+      #- SYS_PTRACE
+    network_mode: container:vpn
+    container_name: qbittorrent-nox
+    environment:
+      #- PAGID=10000
+      - PGID={{ media_group.uid }}
+      - PUID={{ qbittorrent_nox_user.uid }}
+      - QBT_LEGAL_NOTICE={{ QBT_EULA }}
+      - QBT_VERSION={{ QBT_VERSION }}
+      - QBT_WEBUI_PORT={{ QBT_WEBUI_PORT }}
+      - TZ={{ time_zone }}
+      #- UMASK=022
+    image: qbittorrentofficial/qbittorrent-nox:{{ QBT_VERSION }}
+    read_only: false # not compatible with changing UID/GID
+    stop_grace_period: 30m
+    tmpfs:
+      - /tmp
+    tty: true
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.torrent.rule=Host(`torrent.{{ local_domain_name }}`)
+      - traefik.http.services.torrent.loadbalancer.server.port=8080
+      - traefik.http.routers.torrent.entrypoints=websecure
+      - traefik.http.routers.torrent.tls=true
+    volumes:
+      - {{ QBT_DIRECTORIES.CONFIG_PATH }}:/config
+      - type: bind
+        source: {{ QBT_DIRECTORIES.DOWNLOADS_PATH }}
+        target: /downloads
+      - type: bind
+        source: {{ QBT_DIRECTORIES.COMPLETE_TORRENT_PATH }}
+        target: /completed_torrents
+      - type: bind
+        source: {{ QBT_DIRECTORIES.INCOMPLETE_TORRENT_PATH }}
+        target: /incomplete_torrents
+      - type: bind
+        source: {{ QBT_DIRECTORIES.FINISHED_DOWNLOADS_PATH }}
+        target: /media
+    depends_on:
+      - vpn
+
+
+networks:
+  {{ docker_proxy_network.name }}:
+    external: true

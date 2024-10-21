@@ -1,0 +1,9 @@
+FROM traefik
+
+# Copy your certificate
+ARG CERT_NAME=actual-cert.crt
+COPY $CERT_NAME /usr/local/share/ca-certificates/$CERT_NAME
+RUN chmod 644 /usr/local/share/ca-certificates/$CERT_NAME
+
+# Update the SSL certificates
+RUN update-ca-certificates

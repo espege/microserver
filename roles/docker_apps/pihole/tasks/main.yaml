@@ -1,0 +1,41 @@
+# roles/docker_apps/pihole/tasks/main.yaml
+---
+
+- name: Assess requirements
+  ansible.builtin.assert:
+    that:
+      - pihole_webui is defined
+      - pihole_webui != ""
+    fail_msg: "'pihole_webui' must be defined"
+    success_msg: "All requirements met"
+
+- name: Ensure directory
+  ansible.builtin.file:
+    path: '{{ pihole_path }}'
+    state: '{{ (pyhole_install_status == "present") | ternary("directory", "absent") }}'
+
+- name: Local DNS configuration - Use DHCP DNS servers
+  ansible.builtin.include_tasks:
+    file: local_dns.yaml
+
+- name: Copy Docker Compose to root directory
+  ansible.builtin.template:
+    src: "{{ item }}"
+    dest: '{{ pihole_path }}/{{ item | replace(".j2", "")}}'
+  loop:
+    - docker-compose.yaml.j2
+
+- name: Create and start services
+  community.docker.docker_compose_v2:
+    project_src: "{{ pihole_path }}"
+    pull: always
+    state: '{{ pyhole_install_status }}'
+    recreate: auto
+  register: output
+
+- name: Configure PiHole Firewall rules
+  include_role:
+    name: ufw_config
+  tags:
+    - firewall
+    - ufw

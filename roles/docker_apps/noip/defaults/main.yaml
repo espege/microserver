@@ -1,0 +1,3 @@
+noip_config_dir: ./noip
+noip_install_status: present
+time_zone: America/Montreal

@@ -1,0 +1,7 @@
+# roles/docker/tasks/networks.yaml
+---
+
+- name: Create a network with labels
+  community.docker.docker_network:
+    name: "{{ docker_proxy_network.name }}"
+    labels: "{{ docker_proxy_network.labels }}"

@@ -1,0 +1,85 @@
+# roles/plex/tasks/main.yml
+
+- name: Create Plex user
+  ansible.builtin.user:
+    name: plex
+    comment: Created by ansible
+    groups: Media
+    append: true
+    shell: "/usr/sbin/nologin"
+  register:
+    plex_user
+  tags:
+    - prerequisites
+    - user
+
+- name: Create Plex group
+  ansible.builtin.user:
+    name: plex
+    state: present
+  register:
+    plex_group
+  tags:
+    - prerequisites
+    - group
+
+- name: Set permissions for plex home
+  ansible.builtin.file:
+    path: /home/plex
+    state: directory
+    owner: plex
+    group: plex
+    recurse: true
+  tags:
+    - prerequisites
+    - user
+    
+- name: Create Media group
+  ansible.builtin.user:
+    name: Media
+    state: present
+  register:
+    media_group
+  tags:
+    - prerequisites
+    - group
+
+- name: Install docker
+  include_role:
+    name: docker
+  tags:
+    - docker
+    - prerequisites
+
+- name: Run docker compose on remote host
+  block:
+  - name: Ensure directory
+    ansible.builtin.file:
+      path: '{{ docker_compose_path }}'
+      state: directory
+
+  - name: Send docker compose to dest
+    ansible.builtin.template:
+      src: templates/docker-compose-bridge.yml.j2
+      dest: "{{ docker_compose_path }}/docker-compose.yml"
+      mode: '0644'
+
+  - name: Run `docker-compose up`
+    community.docker.docker_compose_v2:
+      project_src: "{{ docker_compose_path }}"
+      build: always
+      state: "{{ desired_state }}"
+    register: output
+  when: 
+    - plex_user is defined
+    - media_group is defined
+    # - plex_group is defined
+  tags:
+    - container
+
+- name: Configure Plex Firewall rules
+  include_role:
+    name: ufw_config
+  tags:
+    - firewall
+    - ufw

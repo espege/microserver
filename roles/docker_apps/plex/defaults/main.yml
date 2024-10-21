@@ -1,0 +1,13 @@
+# roles/plex/defaults
+docker_compose_path: /home/plex
+path_to_plex_db: /home/plex/
+path_to_videos: /micropool/Videos
+path_to_TV: /micropool/Videos/TV
+path_to_music: /micropool/Musique
+path_to_Films: /micropool/Videos/Films
+path_to_Films_de_famille: /micropool/Videos/Famille
+time_zone: America/Montreal
+plex_hostname: SPLéa
+plex_port: 32400
+desired_state: present
+image_tag: public # public reinstalls on every run, else latest

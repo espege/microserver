@@ -1,0 +1,60 @@
+---
+# roles/configure_nordvpn/tasks/main.yml
+
+- name: Confirm that requires values exist
+  ansible.builtin.assert:
+    that:
+      - vpn_token is defined
+      - vpn_token != ""
+
+- name: Run prerequisites
+  ansible.builtin.include_tasks:
+    prerequisites.yaml
+
+- name: Create traefik certificate
+  ansible.builtin.include_tasks:
+    certificate.yaml
+
+- name: Run docker compose on remote host
+  block:
+  - name: Ensure directory
+    ansible.builtin.file:
+      path: '{{ nordvpn_config_path }}'
+      state: directory
+  
+  - name: Send docker compose to dest
+    ansible.builtin.template:
+      src: templates/{{ item }}
+      dest: "{{ nordvpn_config_path }}/{{ item | replace('.j2','') }}"
+      mode: '0644'
+    loop:
+      - docker-compose.yaml.j2
+      - Dockerfile-traefik.j2
+      - actual-cert.crt
+
+  - name: Send traefik config to dest
+    ansible.builtin.template:
+      src: templates/{{ item }}
+      dest: "{{ traefik_config_dir }}/{{ item | replace('.j2','') }}"
+      mode: '0664'
+      owner: "{{ ansible_user }}"
+    loop:
+      - dynamic.yaml.j2
+
+  - name: Run `docker-compose up`
+    community.docker.docker_compose_v2:
+      project_src: "{{ nordvpn_config_path }}"
+      build: always
+      state: "{{ desired_state | default('present')}}"
+    register: output
+  when: 
+    - nordvpn_user is defined
+  tags:
+    - container
+
+- name: Configure nordvpn Firewall rules
+  include_role:
+    name: ufw_config
+  tags:
+    - firewall
+    - ufw

@@ -1,0 +1,22 @@
+---
+# file: roles/docker_apps/noip/tasks/main.yaml
+
+- name: Ensure directory
+  ansible.builtin.file:
+    path: '{{ noip_config_dir }}'
+    state: '{{ (noip_install_status == "present") | ternary("directory", "absent") }}'
+
+- name: Copy Docker Compose to root directory
+  ansible.builtin.template:
+    src: "{{ item }}"
+    dest: '{{ noip_config_dir }}/{{ item | replace(".j2", "")}}'
+  loop:
+    - docker-compose.yaml.j2
+
+- name: Create and start services
+  community.docker.docker_compose_v2:
+    project_src: "{{ noip_config_dir }}"
+    pull: always
+    state: '{{ noip_install_status }}'
+    recreate: auto
+  register: output

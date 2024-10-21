@@ -1,0 +1,27 @@
+# roles/docker_apps/pihole/vars/main.yaml
+pihole_path: ./pihole
+pihole_image: pihole/pihole:latest
+host_services:
+  systemd-resolved:
+    state: restarted
+    enabled: yes
+
+ruleset:
+  - rule: allow
+    proto: tcp
+    port: "{{ dsn_port }}"
+    from_ip: 192.168.0.0/24
+    to_ip: "{{ ansible_host }}"
+    comment: Allow TCP DNS from local domain
+  - rule: allow
+    proto: udp
+    port: "{{ dsn_port }}"
+    from_ip: 192.168.0.0/24
+    to_ip: "{{ ansible_host }}"
+    comment: Allow UDP DNS from local domain
+  - rule: allow
+    proto: tcp
+    port: "{{ http_port }}"
+    from_ip: 192.168.0.0/24
+    to_ip: "{{ ansible_host }}"
+    comment: Allow HTTP to pod from local domain

@@ -1,0 +1,15 @@
+- name: Check LVM exists
+  community.general.lvol:
+    vg: "{{ vg_name }}"
+    lv: "{{ lvm_name }}"
+  check_mode: true
+  register: lvm
+
+- name: Ensure /staging is in fstab for automount
+  ansible.posix.mount:
+    path: "{{ mount_point }}"
+    src: /dev/{{ vg_name}}/{{ lvm_name }}
+    fstype: ext4
+    opts: defaults
+    state: mounted
+  register: mounted_lvm

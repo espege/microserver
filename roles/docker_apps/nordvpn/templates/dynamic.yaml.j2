@@ -1,0 +1,15 @@
+tls:
+  stores:
+    default:
+      defaultCertificate:
+        certFile: {{ traefik_container_certs_dir }}/certificate.pem
+        keyFile: {{ traefik_container_certs_dir }}/certificate.key
+
+  certificates:
+    - certFile: {{ traefik_container_certs_dir }}/certificate.pem
+      keyFile: {{ traefik_container_certs_dir }}/certificate.key
+
+providers:
+  file:
+    filename: {{ traefik_config_dir }}/dynamic.yaml
+    watch: true

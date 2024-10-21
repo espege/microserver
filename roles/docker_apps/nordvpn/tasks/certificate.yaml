@@ -1,0 +1,20 @@
+# roles/docker_apps/nordvpn/tasks/certificate.yaml
+---
+
+- name: Create directory
+  ansible.builtin.file:
+    name: "{{ item }}"
+    state: directory
+    owner: "{{ ansible_user }}"
+  loop:
+    - "{{ traefik_config_dir }}"
+    - "{{ traefik_certs_dir }}"
+
+- name: Generate self-signed certificate
+  include_role:
+    name: self-signed-cert
+  vars:
+    dest_directory: "{{ traefik_certs_dir }}"
+  tags:
+    - certificate
+    - self-signed
