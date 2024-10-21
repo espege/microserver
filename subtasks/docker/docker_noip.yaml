@@ -1,0 +1,3 @@
+- name: Docker install noip_duc
+  include_role:
+    name: docker_apps/noip

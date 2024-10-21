@@ -1,4 +1,0 @@
-- name: Install Python required modules
-  ansible.builtin.pip:
-    name: 
-      - env_canada

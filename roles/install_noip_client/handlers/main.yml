@@ -1,4 +1,0 @@
-- name: restart service
-  ansible.builtin.service:
-    name: onedrive
-    state: restarted
